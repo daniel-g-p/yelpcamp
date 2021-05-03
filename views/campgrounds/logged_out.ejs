@@ -1,0 +1,10 @@
+<%- layout("layouts/boilerplate.ejs") %>
+    <h1>
+        Please log in to use this feature
+    </h1>
+    <hr>
+    <p>You need to be logged in to access "
+        <%=url%>"
+    </p>
+    <a href="/campgrounds"><button class="btn btn-success">Home</button></a>
+    <a href="<%=url%>?user=loggedIn"><button class="btn btn-outline-success">Log in</button></a>
