@@ -19,18 +19,22 @@ const unsplash = createApi({
     accessKey: "_GT7f6XrO9eA4DbJ0hLUvwZvdakQVfVJ2NzmSsBHH2k",
 });
 
+const setFetchSettings = () => {
+    unsplash.collections.getPhotos({ collectionId: '9046579' })
+        .then(res => {
+            return res.response.total;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+};
+
 const fetchCollection = () => {
-    const photos = unsplash.collections.getPhotos({ collectionId: '9046579' })
-        .then(res => console.log(res.response));
-    // fetch("https://api.unsplash.com/collections/9046579/photos", {
-    //         accessKey: "_GT7f6XrO9eA4DbJ0hLUvwZvdakQVfVJ2NzmSsBHH2k",
-    //         method: "GET"
-    //     })
-    //     .then(res => {
-    //         const photos = res;
-    //         console.log(photos);
-    //         return photos;
-    //     });
+    const photos = unsplash.collections.getPhotos({ collectionId: '9046579', perPage: setFetchSettings() })
+        .then(res => {
+            console.log(res.response);
+            return res.response;
+        })
 };
 
 const seedDatabase = async(n) => {
