@@ -7,7 +7,8 @@ const CampgroundSchema = new Schema({
     name: String,
     price: Number,
     description: String,
-    location: String
+    location: String,
+    image: String
 });
 
 // Compile a Model from the Schema
