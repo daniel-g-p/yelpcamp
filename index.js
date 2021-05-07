@@ -14,6 +14,9 @@ const morgan = require("morgan");
 // REQUIRE EJS MATE PACKAGE
 const ejsMate = require("ejs-mate");
 
+// REQUIRE APPERROR CLASS
+const AppError = require("./AppError");
+
 // SET UP MONGOOSE
 const mongoose = require('mongoose');
 mongoose.connect("mongodb://localhost/yelpcamp", { useNewUrlParser: true, useUnifiedTopology: true });
@@ -52,9 +55,7 @@ app.use((req, res, next) => {
 // USER VERIFICATION FUNCTION
 const verifyLogin = (req, res, next) => {
     const user = req.query.user;
-    console.dir(user);
     const url = req.originalUrl;
-    console.log(url);
     if (user === "loggedIn") {
         next();
     } else {
@@ -71,6 +72,7 @@ app.get("/", (req, res) => {
 app.get("/campgrounds", async(req, res) => {
     const campgrounds = await Campground.find({});
     res.render("campgrounds/index", { campgrounds });
+
 });
 
 // ROUTES TO CREATE A NEW CAMPGROUNDS
@@ -142,8 +144,8 @@ app.delete("/campgrounds/delete/:id", async(req, res) => {
     };
 });
 
-// SET UP ERROR 404 ROUTE
-app.use((req, res) => {
+// SET UP ERROR ROUTE
+app.use((req, res, next) => {
     const url = req.originalUrl;
     console.log(`Request for "${url}" returned no results`);
     res.render("campgrounds/not_found", { url });
