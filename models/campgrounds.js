@@ -4,10 +4,16 @@ const { Schema } = mongoose;
 
 // Define a Schema
 const CampgroundSchema = new Schema({
-    name: String,
+    name: {
+        type: String,
+        required: true
+    },
     price: Number,
     description: String,
-    location: String,
+    location: {
+        type: String,
+        required: true
+    },
     image: String
 });
 

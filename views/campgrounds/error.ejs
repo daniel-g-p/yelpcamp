@@ -1,0 +1,12 @@
+<%- layout("layouts/boilerplate.ejs") %>
+    <h1>
+        Error
+        <%=status%> -
+            <%=message%>
+    </h1>
+    <hr>
+    <p>
+        Couldn't handle your request for
+        <%=url%>
+    </p>
+    <a href="/" class="btn btn-success">Home</a>
