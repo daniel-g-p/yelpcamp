@@ -1,27 +1,65 @@
 <%- layout("layouts/boilerplate.ejs") %>
     <h1>New Campground</h1>
     <hr>
-    <form action="/campgrounds" method="POST">
+    <form action="/campgrounds" method="POST" class="needs-validation" novalidate>
         <div class="container">
             <div class="row">
                 <div class="mb-3 col-12 col-lg-5">
                     <label for="name" class="form-label fw-bold">Campground Name</label>
-                    <input type="text" name="cg[name]" id="name" class="form-control" placeholder="Fancy Campground">
+                    <input type="text" name="cg[name]" id="name" class="form-control" placeholder="Fancy Campground" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a valid name.
+                    </div>
                 </div>
                 <div class="mb-3 col-12 col-lg-5">
                     <label for="location" class="form-label fw-bold">Location</label>
-                    <input type="text" name="cg[location]" id="location" class="form-control" placeholder="New York">
+                    <input type="text" name="cg[location]" id="location" class="form-control" placeholder="New York" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a valid location.
+                    </div>
                 </div>
                 <div class="mb-3 col-12 col-lg-2">
                     <label for="exampleFormControlInput1" class="form-label fw-bold">Price</label>
-                    <div class="input-group mb-3">
+                    <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="text" class="form-control" aria-label="Amount" id="price" placeholder="0.00">
+                        <input type="number" class="form-control" aria-label="Amount" name="cg[price]" id="price" placeholder="0.00" required>
+                    </div>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a valid price.
                     </div>
                 </div>
+            </div>
+            <div class="row">
+                <div class="mb-3 col-12">
+                    <label for="image" class="form-label fw-bold">Image URL</label>
+                    <input type="url" name="cg[image]" id="image" class="form-control" placeholder="https://www.mypicture.com" required>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a valid image URL.
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="mb-3 col-12">
                     <label for="description" class="form-label fw-bold">Description</label>
-                    <textarea class="form-control" rows="3" name="cg[description]" id="description" class="form-control" placeholder="A crisp Headline about this Campground..."></textarea>
+                    <textarea class="form-control" rows="3" name="cg[description]" id="description" class="form-control" placeholder="A crisp Headline about this Campground..." required></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a valid description.
+                    </div>
                 </div>
             </div>
         </div>

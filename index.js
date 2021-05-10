@@ -77,13 +77,14 @@ app.get("/campgrounds/new", verifyLogin, (req, res, next) => {
 app.post("/campgrounds", async(req, res, next) => {
     const url = req.originalUrl;
     const data = req.body;
+    console.log(data);
     try {
         const campground = new Campground(data.cg);
         await campground.save();
+        res.redirect(`/campgrounds/${campground.id}`);
     } catch {
         return next(new AppError("Couldn't save the new data to the database (CREATE)...", 500, url))
     };
-    res.redirect(`/campgrounds/${campground.id}`);
 });
 
 // ROUTE TO VIEW AN EXISTING CAMPGROUND IN DETAIL
