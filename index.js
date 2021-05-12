@@ -1,23 +1,28 @@
-// SET UP EXPRESS
 const express = require("express");
 const app = express();
 
-// REQUIRE THE PATH MODULE
 const path = require("path");
 
-// REQUIRE THE METHOD OVERRIDE MODULE
 const methodOverride = require("method-override");
+app.use(methodOverride("_method"));
+app.use(express.urlencoded({ extended: true }));
 
-// REQUIRE MORGAN MIDDLEWARE
 const morgan = require("morgan");
+app.use(morgan("tiny"));
 
-// REQUIRE EJS MATE PACKAGE
 const ejsMate = require("ejs-mate");
+app.engine("ejs", ejsMate);
 
-// REQUIRE APPERROR CLASS
-const AppError = require("./AppError");
+const Campground = require("./utilities/campground_model");
 
-// SET UP MONGOOSE
+const AppError = require("./utilities/app_error");
+
+const validateCampground = require("./utilities/joi_schema");
+
+const catchError = require("./utilities/error_handler");
+
+const verifyLogin = require("./utilities/verify_login");
+
 const mongoose = require('mongoose');
 mongoose.connect("mongodb://localhost/yelpcamp", { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
@@ -26,136 +31,84 @@ db.once("open", function() {
     console.log("Connected to Mongo DB")
 });
 
-// REQUIRE THE DATABASE MODEL
-const Campground = require("./models/campgrounds");
-
-// SET UP ENGINE
-app.engine("ejs", ejsMate);
-
-// SET UP THE VIEWS DIRECTORY
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-// ENABLE FORM PARSING
-app.use(express.urlencoded({ extended: true }));
-
-// ENABLE METHOD OVERRIDE
-app.use(methodOverride("_method"));
-
-// ENABLE MORGAN MIDDLEWARE
-app.use(morgan("tiny"));
-
-// USER VERIFICATION FUNCTION
-const verifyLogin = (req, res, next) => {
-    const user = req.query.user;
-    const url = req.originalUrl;
-    if (user === "loggedIn") {
-        return next();
-    } else {
-        throw new AppError("Please log into your Account", 401, url);
-    }
-};
-
-// INDEX ROUTE
 app.get("/", (req, res) => {
     res.render("index");
 });
 
-// ROUTE FOR ALL CAMPGROUNDS
-app.get("/campgrounds", async(req, res, next) => {
+app.get("/campgrounds", catchError(async(req, res, next) => {
     const campgrounds = await Campground.find({});
     if (!campgrounds) {
-        throw new AppError("Couldn't retrieve the requested data from the database (ALL)...", 400);
+        return next(new AppError("Couldn't retrieve the campground list from the database", 500, "/"));
     };
-    res.render("campgrounds/index", { campgrounds });
-});
+    res.render("home", { campgrounds });
+}));
 
-// ROUTES TO CREATE A NEW CAMPGROUND
 app.get("/campgrounds/new", verifyLogin, (req, res, next) => {
-    res.render("campgrounds/new");
+    res.render("new");
 });
-app.post("/campgrounds", async(req, res, next) => {
-    const url = req.originalUrl;
+app.post("/campgrounds", validateCampground, catchError(async(req, res, next) => {
     const data = req.body;
-    console.log(data);
-    try {
-        const campground = new Campground(data.cg);
-        await campground.save();
-        res.redirect(`/campgrounds/${campground.id}`);
-    } catch {
-        return next(new AppError("Couldn't save the new data to the database (CREATE)...", 500, url))
-    };
-});
+    const campground = new Campground(data.cg);
+    await campground.save();
+    res.redirect(`/campgrounds/${campground.id}`);
+}));
 
-// ROUTE TO VIEW AN EXISTING CAMPGROUND IN DETAIL
-app.get("/campgrounds/:id", async(req, res, next) => {
+app.get("/campgrounds/:id", catchError(async(req, res, next) => {
     const id = req.params.id;
-    const url = req.originalUrl;
-    try {
-        const campground = await Campground.findById(id).exec();
-        res.render("campgrounds/show", { campground });
-    } catch {
-        return next(new AppError("Couldn't retrieve the requested data from the database (READ)...", 400, url));
+    const campground = await Campground.findById(id).exec();
+    if (!campground) {
+        throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
     }
-});
+    res.render("show", { campground });
+}));
 
-// ROUTES TO UPDATE AN EXISTING CAMPGROUND
-app.get("/campgrounds/edit/:id", verifyLogin, async(req, res, next) => {
+app.get("/campgrounds/edit/:id", verifyLogin, catchError(async(req, res, next) => {
     const id = req.params.id;
-    const url = req.originalUrl;
-    try {
-        const campground = await Campground.findById(id).exec();
-        res.render("campgrounds/edit", { campground });
-    } catch {
-        return next(new AppError("Couldn't retrieve the requested data from the database (UPDATE)...", 400, url))
-    };
-});
-app.patch("/campgrounds/edit/:id", async(req, res, next) => {
+    const campground = await Campground.findById(id).exec();
+    if (!campground) {
+        throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
+    }
+    res.render("edit", { campground });
+}));
+app.patch("/campgrounds/edit/:id", validateCampground, catchError(async(req, res, next) => {
     const id = req.params.id;
     const data = req.body;
-    const url = req.originalUrl;
-    try {
-        await Campground.findByIdAndUpdate(id, data.cg, { useFindAndModify: false });
-        res.redirect(`/campgrounds/${id}`);
-    } catch {
-        return next(new AppError("Couldn't save the new data from the database (UPDATE)...", 400, url))
-    };
-});
+    if (!campground) {
+        throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
+    }
+    await Campground.findByIdAndUpdate(id, data.cg, { useFindAndModify: false });
+    res.redirect(`/campgrounds/${id}`);
+}));
 
-// ROUTES TO DELETE AN EXISTING CAMPGROUND
-app.get("/campgrounds/delete/:id", verifyLogin, async(req, res, next) => {
+app.get("/campgrounds/delete/:id", verifyLogin, catchError(async(req, res, next) => {
     const id = req.params.id;
-    const url = req.originalUrl;
-    try {
-        const campground = await Campground.findById(id).exec();
-        res.render("campgrounds/delete", { campground });
-    } catch {
-        return next(new AppError("Couldn't retrieve the requested data from the database (DELETE)...", 400, url))
-    };
-});
-app.delete("/campgrounds/delete/:id", async(req, res, next) => {
+    const campground = await Campground.findById(id).exec();
+    if (!campground) {
+        throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
+    }
+    res.render("delete", { campground });
+}));
+app.delete("/campgrounds/delete/:id", catchError(async(req, res, next) => {
     const id = req.params.id;
-    const url = req.originalUrl;
-    try {
-        const campground = await Campground.findByIdAndDelete(id);
-        res.redirect("/campgrounds");
-    } catch {
-        return next(new AppError("Couldn't delete the data from the database (DELETE)...", 500, url));
-    };
-});
+    const campground = await Campground.findByIdAndDelete(id);
+    if (!campground) {
+        throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
+    }
+    res.redirect("/campgrounds");
+}));
 
 // ROUTE FOR ERROR HANDLING
 app.use((err, req, res, next) => {
-    const { message = "An error occurred...", status = 500, url = "/" } = err;
-    console.log(err.name);
-    if (status === 401) {
-        res.render("campgrounds/logged_out", err);
+    const { message = "An error occurred...", status = 500, url = "/campgrounds" } = err;
+    if (status === 403) {
+        res.render("logged_out", err);
     }
-    console.log("Error occurred...");
-    res.render("campgrounds/error", { message, status, url });
+    res.render("error", { message, status, url });
 });
 
-// START THE SERVER
 app.listen(3000, () => {
     console.log("Connected to Port 3000");
 });

@@ -1,0 +1,12 @@
+<%- layout("layouts/boilerplate.ejs") %>
+    <div class="text-center position-absolute top-50 start-50 translate-middle">
+        <h1 class="mb-3">Error
+            <%=status%>
+        </h1>
+        <hr>
+        <p>
+            <%=message%>
+        </p>
+        <a href="<%=url%>?user=loggedIn" class="btn btn-success">Log In</a>
+        <a href="/campgrounds" class="btn btn-outline-danger">Back</a>
+    </div>
