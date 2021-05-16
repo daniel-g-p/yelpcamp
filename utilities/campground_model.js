@@ -1,8 +1,8 @@
-// Set up Mongoose
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-// Define a Schema
+const Review = require("./review_model");
+
 const CampgroundSchema = new Schema({
     name: {
         type: String,
@@ -23,12 +23,17 @@ const CampgroundSchema = new Schema({
     image: {
         type: String,
         required: true
-    }
+    },
+    reviews: [{
+        type: Schema.Types.ObjectId,
+        ref: "Review"
+    }]
 });
 
-// Compile a Model from the Schema
+CampgroundSchema.post("findOneAndDelete", async(campground) => {
+    await Review.deleteMany({ _id: { $in: campground.reviews } });
+});
+
 const Campground = mongoose.model("Campground", CampgroundSchema);
 
-
-// Export the Model to use it in other Files
 module.exports = Campground;

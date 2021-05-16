@@ -18,4 +18,19 @@ const validateCampground = (req, res, next) => {
     };
 };
 
-module.exports = validateCampground;
+const validateReview = (req, res, next) => {
+    const validReview = Joi.object({
+        name: Joi.string().required(),
+        comment: Joi.string().required(),
+        rating: Joi.number().min(1).max(5).required()
+    }).required();
+    const review = validReview.validate(req.body.review);
+    if (review.error) {
+        return next(new AppError("Invalid Review", 407));
+    } else {
+        next();
+    }
+}
+
+module.exports.validateCampground = validateCampground;
+module.exports.validateReview = validateReview;

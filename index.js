@@ -15,9 +15,11 @@ app.engine("ejs", ejsMate);
 
 const Campground = require("./utilities/campground_model");
 
+const Review = require("./utilities/review_model");
+
 const AppError = require("./utilities/app_error");
 
-const validateCampground = require("./utilities/joi_schema");
+const { validateCampground, validateReview } = require("./utilities/joi_schema");
 
 const catchError = require("./utilities/error_handler");
 
@@ -58,7 +60,7 @@ app.post("/campgrounds", validateCampground, catchError(async(req, res, next) =>
 
 app.get("/campgrounds/:id", catchError(async(req, res, next) => {
     const id = req.params.id;
-    const campground = await Campground.findById(id).exec();
+    const campground = await Campground.findById(id).populate("reviews");
     if (!campground) {
         throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
     }
@@ -100,7 +102,24 @@ app.delete("/campgrounds/delete/:id", catchError(async(req, res, next) => {
     res.redirect("/campgrounds");
 }));
 
-// ROUTE FOR ERROR HANDLING
+app.post("/campground/:id/review", validateReview, catchError(async(req, res) => {
+    const id = req.params.id;
+    const data = req.body.review;
+    const review = await Review.create(data);
+    const campground = await Campground.findById(id);
+    campground.reviews.unshift(review);
+    campground.save();
+    res.redirect(`/campgrounds/${id}`);
+}));
+
+app.delete("/campground/:id/review/:reviewId", catchError(async(req, res) => {
+    campgroundID = req.params.id;
+    reviewID = req.params.reviewId;
+    const campground = await Campground.findByIdAndUpdate(campgroundID, { $pull: { reviews: reviewID } });
+    await Review.findByIdAndDelete(reviewID);
+    res.redirect(`/campgrounds/${campgroundID}`);
+}));
+
 app.use((err, req, res, next) => {
     const { message = "An error occurred...", status = 500, url = "/campgrounds" } = err;
     if (status === 403) {

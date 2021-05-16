@@ -23,7 +23,9 @@ db.on("error", console.error.bind(console, "Connection Error:"));
 db.once("open", function() {
     console.log("Connected to Mongo DB")
 });
+
 const Campground = require("./../campground_model");
+const Review = require("./../review_model");
 
 const unsplash = createApi({
     accessKey: "_GT7f6XrO9eA4DbJ0hLUvwZvdakQVfVJ2NzmSsBHH2k",
@@ -75,4 +77,9 @@ const seedDatabase = async(n) => {
     }
     await Campground.insertMany(seedData);
     console.log(`Campground database seeded successfully with ${count} items`);
+};
+
+const resetDatabase = async() => {
+    await Campground.deleteMany({});
+    console.log("Database reset successful...");
 };
