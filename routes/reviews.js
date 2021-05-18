@@ -1,13 +1,12 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const catchError = require("../utilities/error_handler");
 const { validateReview } = require("../utilities/joi_schema");
-
 const Campground = require("../utilities/campground_model");
 const Review = require("../utilities/review_model");
 
-router.post("/:id/review", validateReview, catchError(async(req, res) => {
+router.post("/", validateReview, catchError(async(req, res) => {
     const id = req.params.id;
     const data = req.body.review;
     const review = await Review.create(data);
@@ -17,7 +16,7 @@ router.post("/:id/review", validateReview, catchError(async(req, res) => {
     res.redirect(`/campgrounds/${id}`);
 }));
 
-router.delete("/:id/review/:reviewId", catchError(async(req, res) => {
+router.delete("/:reviewId", catchError(async(req, res) => {
     campgroundID = req.params.id;
     reviewID = req.params.reviewId;
     const campground = await Campground.findByIdAndUpdate(campgroundID, { $pull: { reviews: reviewID } });

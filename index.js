@@ -3,17 +3,13 @@ const app = express();
 
 const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
-
+const path = require("path");
 const methodOverride = require("method-override");
-app.use(methodOverride("_method"));
-app.use(express.urlencoded({ extended: true }));
-
 const morgan = require("morgan");
-app.use(morgan("tiny"));
-
 const ejsMate = require("ejs-mate");
-app.engine("ejs", ejsMate);
-
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const flash = require("connect-flash");
 const mongoose = require('mongoose');
 mongoose.connect("mongodb://localhost/yelpcamp", { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
@@ -22,6 +18,31 @@ db.once("open", function() {
     console.log("Connected to Mongo DB")
 });
 
+const sessionConfig = {
+    secret: "thisshouldbesecret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 365,
+        maxAge: 1000 * 60 * 60 * 24 * 365
+    }
+}
+
+app.use(express.static(path.join(__dirname, "public")));
+app.use(methodOverride("_method"));
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("tiny"));
+app.use(cookieParser());
+app.use(session(sessionConfig));
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+
+app.engine("ejs", ejsMate);
 app.set("views", "./views");
 app.set("view engine", "ejs");
 
@@ -31,12 +52,12 @@ app.get("/", (req, res) => {
 
 app.use("/campgrounds", campgroundRoutes);
 
-app.use("/campground", reviewRoutes);
+app.use("/campground/:id/review", reviewRoutes);
 
 app.use((err, req, res, next) => {
     const { message = "An error occurred...", status = 500, url = "/campgrounds" } = err;
     if (status === 403) {
-        res.render("logged_out", err);
+        res.render("logged_out", { message, status, url });
     }
     res.render("error", { message, status, url });
 });
