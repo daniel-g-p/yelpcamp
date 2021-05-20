@@ -32,5 +32,21 @@ const validateReview = (req, res, next) => {
     }
 }
 
+const validateUser = (req, res, next) => {
+    const validUser = Joi.object({
+        email: Joi.string().email().required(),
+        username: Joi.string().required(),
+        password: Joi.string().min(8).max(20).required()
+    }).required();
+    const user = validUser.validate(req.body.user);
+    if (user.error) {
+        req.flash("error", "Invalid User");
+        res.redirect("/users/register");
+    } else {
+        next();
+    }
+};
+
 module.exports.validateCampground = validateCampground;
 module.exports.validateReview = validateReview;
+module.exports.validateUser = validateUser;

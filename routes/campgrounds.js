@@ -66,7 +66,7 @@ router.get("/delete/:id", verifyLogin, catchError(async(req, res, next) => {
 }));
 router.delete("/delete/:id", catchError(async(req, res, next) => {
     const id = req.params.id;
-    req.flash("error", "Something went wrong...")
+    req.flash("success", "Campground was deleted from the Database...");
     const campground = await Campground.findByIdAndDelete(id);
     if (!campground) {
         throw new AppError(`Couldn't find the campground with the ID of ${id}`, 404);
