@@ -1,12 +1,10 @@
-const AppError = require("./app_error");
-
 const verifyLogin = (req, res, next) => {
-    const user = req.query.user;
-    const url = req.originalUrl;
-    if (user === "loggedIn") {
-        return next();
+    if (req.session.userID) {
+        next();
     } else {
-        return next(new AppError("Please log into your Account", 403, url));
+        req.session.returnTo = req.originalUrl;
+        req.flash("error", "Please log into your account...");
+        res.redirect("/users/login");
     }
 };
 

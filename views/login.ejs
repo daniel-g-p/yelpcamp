@@ -1,0 +1,25 @@
+<%- layout("layouts/boilerplate.ejs") %>
+    <form action="/users/login" method="POST" class="w-25 mx-auto position-absolute top-50 start-50 translate-middle needs-validation" novalidate>
+        <h1>Login</h1>
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" aria-describedby="emailHelp" name="user[username]" required>
+            <div class="valid-feedback">
+                Looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please provide a valid username.
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="user[password]" required>
+            <div class="valid-feedback">
+                Looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please provide a valid username.
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Login</button>
+    </form>

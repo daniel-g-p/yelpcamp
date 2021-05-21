@@ -3,10 +3,11 @@ const router = express.Router({ mergeParams: true });
 
 const catchError = require("../utilities/error_handler");
 const { validateReview } = require("../utilities/joi_schema");
+const verifyLogin = require("../utilities/verify_login");
 const Campground = require("../utilities/campground_model");
 const Review = require("../utilities/review_model");
 
-router.post("/", validateReview, catchError(async(req, res) => {
+router.post("/", verifyLogin, validateReview, catchError(async(req, res) => {
     const id = req.params.id;
     const data = req.body.review;
     const review = await Review.create(data);
