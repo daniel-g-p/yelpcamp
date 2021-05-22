@@ -20,7 +20,6 @@ const validateCampground = (req, res, next) => {
 
 const validateReview = (req, res, next) => {
     const validReview = Joi.object({
-        name: Joi.string().required(),
         comment: Joi.string().required(),
         rating: Joi.number().min(1).max(5).required()
     }).required();

@@ -1,6 +1,15 @@
 const cities = require("./cities");
 const helpers = require("./helpers");
 
+const fetch = require("node-fetch");
+const { createApi } = require("unsplash-js");
+const unsplash = createApi({
+    accessKey: "_GT7f6XrO9eA4DbJ0hLUvwZvdakQVfVJ2NzmSsBHH2k",
+});
+
+const Chance = require("chance");
+const chance = new Chance();
+
 const LoremIpsum = require("lorem-ipsum").LoremIpsum;
 const lorem = new LoremIpsum({
     sentencesPerParagraph: {
@@ -13,9 +22,6 @@ const lorem = new LoremIpsum({
     }
 });
 
-const fetch = require("node-fetch");
-const { createApi } = require("unsplash-js");
-
 const mongoose = require('mongoose');
 mongoose.connect("mongodb://localhost/yelpcamp", { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
@@ -26,60 +32,60 @@ db.once("open", function() {
 
 const Campground = require("./../campground_model");
 const Review = require("./../review_model");
+const User = require("./../user_model");
 
-const unsplash = createApi({
-    accessKey: "_GT7f6XrO9eA4DbJ0hLUvwZvdakQVfVJ2NzmSsBHH2k",
-});
-
-
-const setFetchSettings = () => {
-    return unsplash.collections.getPhotos({ collectionId: '9046579' })
-        .then(res => {
-            return res.response.total;
-        })
-        .catch(error => {
-            console.log(error);
-        });
-}
-
-let photos;
-const fetchCollection = async() => {
-    const totalImages = await setFetchSettings();
-    return unsplash.collections.getPhotos({ collectionId: '9046579', perPage: totalImages, page: 1 })
-        .then(res => {
-            photos = res.response.results;
-            return photos.length;
-        });
+const fetchImages = async() => {
+    return unsplash.collections.getPhotos({ collectionId: '9046579', perPage: 25 })
+        .then(res => { return res.response.results })
+        .catch(error => console.log(error));
 };
 
 const seedDatabase = async(n) => {
-    await Campground.deleteMany({});
+    await resetDatabase();
+    const imageList = await fetchImages();
+    console.log(imageList);
+    const admin = await User.create({
+        email: "admin@yelpcamp.com",
+        username: "admin",
+        password: "Yelpcamp2021"
+    });
     const seedData = [];
-    const images = await fetchCollection();
-    let count = 0;
     for (i = 0; i < n; i++) {
-        const randomCity = Math.floor(Math.random() * cities.length);
-        const randomDescriptor = Math.floor(Math.random() * helpers.descriptors.length);
-        const randomPlace = Math.floor(Math.random() * helpers.places.length);
-        const randomImage = Math.floor(Math.random() * images)
+        const randomCity = chance.integer({ min: 0, max: cities.length - 1 });
+        const randomDescriptor = chance.integer({ min: 0, max: helpers.descriptors.length - 1 });
+        const randomPlace = chance.integer({ min: 0, max: helpers.places.length - 1 });
+        const randomImage = chance.integer({ min: 0, max: imageList.length - 1 });
         const city = cities[randomCity].city;
         const name = helpers.descriptors[randomDescriptor] + " " + helpers.places[randomPlace];
-        const imageLink = photos[randomImage].urls.small;
+        const imageLink = imageList[randomImage].urls.small;
+        const reviews = [];
+        for (x = 0; x < 3; x++) {
+            const review = await Review.create({
+                name: chance.first(),
+                rating: chance.integer({ min: 1, max: 5 }),
+                comment: lorem.generateSentences(1),
+                author: admin
+            });
+            reviews.push(review);
+        };
         const newCampground = {
             name: name,
             price: Math.floor(Math.random() * 40) + 10,
             description: lorem.generateSentences(1),
             location: city,
-            image: imageLink
+            image: imageLink,
+            author: admin,
+            reviews: reviews
         }
         seedData.push(newCampground);
-        count++;
     }
     await Campground.insertMany(seedData);
-    console.log(`Campground database seeded successfully with ${count} items`);
+    console.log(`Database seeded successfully...`);
 };
 
 const resetDatabase = async() => {
     await Campground.deleteMany({});
-    console.log("Database reset successful...");
+    await User.deleteMany({});
+    await Review.deleteMany({});
+    console.log("Database reset successfully...");
 };

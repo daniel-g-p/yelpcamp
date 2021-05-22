@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const reviewSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
     rating: {
         type: Number,
         required: true,
@@ -15,6 +11,10 @@ const reviewSchema = new Schema({
     comment: {
         type: String,
         required: true,
+    },
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
     }
 });
 

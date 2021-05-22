@@ -16,15 +16,7 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true
-    },
-    campgrounds: [{
-        type: Schema.Types.ObjectId,
-        ref: "Campground"
-    }],
-    reviews: [{
-        type: Schema.Types.ObjectId,
-        ref: "Review"
-    }]
+    }
 });
 
 userSchema.pre("save", async function(next) {

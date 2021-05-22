@@ -12,6 +12,10 @@
                 <h5 class=" card-title ">
                     <%=campground.name%>
                 </h5>
+                <h6>
+                    Created by
+                    <%= campground.author.username %>
+                </h6>
                 <ul class="list-group list-group-flush mx-0 my-3">
                     <li class="list-group-item"><b>Location: </b>
                         <%=campground.location%>
@@ -23,8 +27,10 @@
                 <p class="card-text">
                     <%=campground.description%>
                 </p>
-                <a href=" /campgrounds/edit/<%=campground.id%>" class="btn btn-success">Edit</a>
-                <a href="/campgrounds/delete/<%=campground.id%>"><button class="btn btn-danger">Delete</button></a>
+                <% if (owner) {%>
+                    <a href=" /campgrounds/edit/<%=campground.id%>" class="btn btn-success">Edit</a>
+                    <a href="/campgrounds/delete/<%=campground.id%>"><button class="btn btn-danger">Delete</button></a>
+                    <% } %>
             </div>
         </div>
     </div>
@@ -35,17 +41,7 @@
             <form action="/campground/<%=campground.id%>/review" method="POST" class="needs-validation" novalidate>
                 <div class="container">
                     <div class="row">
-                        <div class="col-3 mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="review[name]" required>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div class="invalid-feedback">
-                                Please enter your Name
-                            </div>
-                        </div>
-                        <div class="col-6 mb-3">
+                        <div class="col-9 mb-3">
                             <label for="comment" class="form-label">Your Comments</label>
                             <input type="text" class="form-control" id="comment" name="review[comment]" required>
                             <div class="valid-feedback">
@@ -78,17 +74,16 @@
                 <div class="d-flex bd-highlight flex-row justify-content-between align-items-center">
                     <div>
                         <p class="m-0">
-                            <%=review.name%> -
-                                <%=review.comment%> -
-                                    <%=review.rating%>/5
+                            <b>@<%=review.author.username%> </b>-
+                            <%=review.comment%> -
+                                <%=review.rating%>/5
                         </p>
                     </div>
                     <div class="d-flex bd-highlight flex-row justify-content-between align-items-center">
-                        <form action="/campground/<%=campground.id%>/review/<%=review.id%>?_method=DELETE" method="POST">
-                            <button class="btn btn-success">Edit</button>
-                        </form>
                         <form action="/campground/<%=campground.id%>/review/<%=review.id%>?_method=DELETE" method="POST" class="ms-2">
-                            <button class="btn btn-danger">Delete</button>
+                            <% if (review.author.id==userID) {%>
+                                <button class="btn btn-danger">Delete</button>
+                                <% } %>
                         </form>
                     </div>
                 </div>
