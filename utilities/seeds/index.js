@@ -43,7 +43,6 @@ const fetchImages = async() => {
 const seedDatabase = async(n) => {
     await resetDatabase();
     const imageList = await fetchImages();
-    console.log(imageList);
     const admin = await User.create({
         email: "admin@yelpcamp.com",
         username: "admin",
