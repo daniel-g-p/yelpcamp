@@ -38,10 +38,10 @@
     <div class="card my-3 bg-light">
         <div class="card-body">
             <h3>Add a Review</h3>
-            <form action="/campground/<%=campground.id%>/review" method="POST" class="needs-validation" novalidate>
+            <form action="/campground/<%=campground.id%>/review" method="POST" class="needs-validation" id="reviewForm" novalidate>
                 <div class="container">
                     <div class="row">
-                        <div class="col-9 mb-3">
+                        <div class="col-10 mb-3">
                             <label for="comment" class="form-label">Your Comments</label>
                             <input type="text" class="form-control" id="comment" name="review[comment]" required>
                             <div class="valid-feedback">
@@ -51,12 +51,9 @@
                                 Please leave a comment
                             </div>
                         </div>
-                        <div class="col-3 mb-3">
-                            <label for="rating" class="form-label">Rating</label>
-                            <input type="range" class="form-range" id="rating" name="review[rating]" min="1" max="5" step="1" required>
-                            <div class="valid-feedback">
-                                Looks good!
-                            </div>
+                        <div class="col-2 mb-3 d-flex flex-column align-items-start">
+                            <p>Your Rating</p>
+                            <%- include("./partials/star_rating_form.ejs")%>
                         </div>
                     </div>
                     <div class="row">
@@ -76,7 +73,12 @@
                         <p class="m-0">
                             <b>@<%=review.author.username%> </b>-
                             <%=review.comment%> -
-                                <%=review.rating%>/5
+                                <% for (i=0; i < review.rating; i++) {%>
+                                    &#9733
+                                    <% } %>
+                                        <% for (i=0; i < 5 - review.rating; i++) {%>
+                                            &#9734
+                                            <% } %>
                         </p>
                     </div>
                     <div class="d-flex bd-highlight flex-row justify-content-between align-items-center">

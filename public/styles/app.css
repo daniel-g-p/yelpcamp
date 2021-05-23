@@ -1,0 +1,48 @@
+input {
+    display: none;
+}
+
+svg,
+path {
+    pointer-events: none;
+}
+
+path {
+    opacity: 0.25;
+    transition: opacity 0.25s ease;
+}
+
+.star {
+    margin: auto 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.25s ease;
+}
+
+.star:hover {
+    cursor: pointer;
+    transform: scale(1.25);
+}
+
+.starRating {
+    transform: scale(1.5);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: 20px;
+    transition: transform 0.1s ease;
+}
+
+.starRating.shifted {
+    transform: scale(1.5) translateX(4px);
+}
+
+.star.checked path {
+    opacity: 1;
+}
+
+.star.fixed path {
+    opacity: 1;
+}
