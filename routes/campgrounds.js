@@ -5,10 +5,12 @@ const catchError = require("../utilities/error_handler");
 const verifyLogin = require("../utilities/verify_login");
 const verifyAuthor = require("../utilities/verify_author");
 const { validateCampground } = require("../utilities/joi_schema");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 router.route("/")
     .get(catchError(campgrounds.index))
-    .post(validateCampground, catchError(campgrounds.createCampground));
+    .post(upload.array("images"), validateCampground, catchError(campgrounds.createCampground));
 
 router.get("/new", verifyLogin, campgrounds.newCampground);
 

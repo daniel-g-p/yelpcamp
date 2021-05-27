@@ -53,12 +53,18 @@ const seedDatabase = async(n) => {
         const randomCity = chance.integer({ min: 0, max: cities.length - 1 });
         const randomDescriptor = chance.integer({ min: 0, max: helpers.descriptors.length - 1 });
         const randomPlace = chance.integer({ min: 0, max: helpers.places.length - 1 });
-        const randomImage = chance.integer({ min: 0, max: imageList.length - 1 });
         const city = cities[randomCity].city;
         const name = helpers.descriptors[randomDescriptor] + " " + helpers.places[randomPlace];
-        const imageLink = imageList[randomImage].urls.small;
+        const images = [];
         const reviews = [];
         for (x = 0; x < 3; x++) {
+            const randomImage = chance.integer({ min: 0, max: imageList.length - 1 });
+            const imageLink = imageList[randomImage].urls.small;
+            const image = {
+                path: imageLink,
+                filename: `image${x}`
+            };
+            images.push(image);
             const review = await Review.create({
                 name: chance.first(),
                 rating: chance.integer({ min: 1, max: 5 }),
@@ -72,13 +78,14 @@ const seedDatabase = async(n) => {
             price: Math.floor(Math.random() * 40) + 10,
             description: lorem.generateSentences(1),
             location: city,
-            image: imageLink,
+            images: images,
             author: admin,
             reviews: reviews
         }
         seedData.push(newCampground);
     }
     await Campground.insertMany(seedData);
+    console.log(seedData);
     console.log(`Database seeded successfully...`);
 };
 

@@ -20,10 +20,10 @@ const CampgroundSchema = new Schema({
         type: String,
         required: true
     },
-    image: {
-        type: String,
-        required: true
-    },
+    images: [{
+        path: String,
+        filename: String,
+    }],
     author: {
         type: Schema.Types.ObjectId,
         ref: "User"

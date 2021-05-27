@@ -2,6 +2,7 @@ const Campground = require("../utilities/campground_model");
 const User = require("../utilities/user_model");
 const isOwner = require("../utilities/isOwner");
 const AppError = require("../utilities/app_error");
+const { upload } = require("../utilities/s3");
 
 module.exports.index = async(req, res, next) => {
     const campgrounds = await Campground.find({});
@@ -16,10 +17,22 @@ module.exports.newCampground = (req, res, next) => {
 };
 
 module.exports.createCampground = async(req, res, next) => {
-    const data = req.body;
+    const { files } = req;
+    const uploads = upload(files);
+    const images = await Promise.all(uploads)
+        .then((result) => { return result });
+    const data = req.body.cg;
+    data.images = images.map(i => {
+        return {
+            path: i.Location,
+            filename: i.Key
+        }
+    });
+    console.log(data);
     const { userID } = req.session;
-    const campground = new Campground(data.cg);
+    const campground = new Campground(data);
     campground.author = await User.findById(userID);
+    console.log(campground);
     await campground.save();
     req.flash("success", "Campground has been added to the list...");
     res.redirect(`/campgrounds/${campground.id}`);
