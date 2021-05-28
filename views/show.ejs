@@ -6,7 +6,23 @@
     <div class="card container overflow-hidden mb-3">
         <div class="row position-relative">
             <div class="col-4 position-relative" style="min-height: 100%">
-                <img src="<%=campground.images[0].path%>" class="card-img-top position-absolute position-absolute top-50 start-50 translate-middle" alt="<%=campground.description%>" style="min-height: 100%;">
+                <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <% campground.images.forEach((img, i)=> {%>
+                            <div class="carousel-item <% if (i === 0) {%>active<% } %> ">
+                                <img src="<%=img.path%>" class="d-block w-100" alt="<%= i.filename %> ">
+                            </div>
+                            <% }) %>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
             </div>
             <div class=" card-body col-8 p-5">
                 <h5 class=" card-title ">
